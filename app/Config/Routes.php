@@ -48,3 +48,25 @@ $routes->post('movimentacoes/salvarSaida', 'Movimentacoes::salvarSaida');
    ROTAS - USUÁRIOS
 ======================= */
 
+/*=======================
+   ROTAS - ESTOQUE do dashboard de estoque
+======================= */
+
+$routes->get('estoque/dashboard/(:num)', 'EstoqueDashboard::index/$1');
+$routes->get('estoque/dashboard', 'EstoqueDashboard::index');
+
+
+/*=======================
+   ROTAS - RELATÓRIOS
+======================= */
+
+
+// RELATÓRIO DE MOVIMENTAÇÕES DE ESTOQUE
+$routes->get('estoque/relatorio', 'Estoque::relatorioMov');
+
+
+
+
+
+
+

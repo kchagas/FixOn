@@ -35,6 +35,9 @@
         <a href="<?= site_url('pecas/cadastrar') ?>"><i class="bi bi-plus-circle"></i> Cadastrar Peça</a>
             <a href="<?= site_url('movimentacoes/entrada') ?>"><i class="bi bi-arrow-down-circle"></i> Entrada de Estoque</a>
     <a href="<?= site_url('movimentacoes/saida') ?>"><i class="bi bi-arrow-up-circle"></i> Saída de Estoque</a>
+    <a href="<?= site_url('estoque/dashboard') ?>"><i class="bi bi-speedometer2"></i> Dashboard do Estoque</a>
+     <a href="<?= site_url('estoque/relatorio') ?>"><i class="bi bi-clipboard-data"></i>Relatório de Movimentações</a>
+
     
     </div>
 

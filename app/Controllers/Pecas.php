@@ -105,13 +105,30 @@ class Pecas extends BaseController
 
     // EXCLUIR PEÇA
     public function excluir($id)
-    {
-        $model = new PecaModel();
+{
+    $pecaModel = new PecaModel();
 
-        $model->where('empresa_id', session()->get('empresa_id'))
-              ->where('id', $id)
-              ->delete();
+    try {
+        $pecaModel->delete($id);
 
-        return redirect()->to('/pecas')->with('success', 'Peça excluída com sucesso!');
+        return redirect()
+            ->to('/pecas')
+            ->with('success', 'Peça excluída com sucesso.');
+
+    } catch (\Exception $e) {
+
+        // Verifica se é erro de integridade (FK - código 1451)
+        if (strpos($e->getMessage(), '1451') !== false) {
+
+            return redirect()
+                ->to('/pecas')
+                ->with('erro_exclusao', 'Esta peça já possui movimentações no estoque e não pode ser excluída.');
+        }
+
+        // Outros erros genéricos
+        return redirect()
+            ->to('/pecas')
+            ->with('erro_exclusao', 'Erro ao excluir a peça.');
     }
+}
 }
