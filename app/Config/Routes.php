@@ -17,3 +17,12 @@ $routes->group('dashboard', ['filter' => 'auth'], function($routes){
 $routes->get('/', 'Dashboard::index');
 $routes->get('admin', 'Dashboard::adminArea', ['filter' => "role:admin"]);
 });
+
+
+/* =======================
+   ROTAS - ESTOQUE / PEÇAS
+======================= */
+$routes->get('pecas/cadastrar', 'Pecas::cadastrar');
+$routes->post('pecas/salvar', 'Pecas::salvar');
+$routes->get('pecas', 'Pecas::index'); // futuramente listagem
+
