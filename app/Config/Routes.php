@@ -22,7 +22,12 @@ $routes->get('admin', 'Dashboard::adminArea', ['filter' => "role:admin"]);
 /* =======================
    ROTAS - ESTOQUE / PEÇAS
 ======================= */
+$routes->get('pecas', 'Pecas::index'); // futuramente listagem
 $routes->get('pecas/cadastrar', 'Pecas::cadastrar');
 $routes->post('pecas/salvar', 'Pecas::salvar');
-$routes->get('pecas', 'Pecas::index'); // futuramente listagem
+
+$routes->get('pecas/editar/(:num)', 'Pecas::editar/$1');
+$routes->post('pecas/atualizar/(:num)', 'Pecas::atualizar/$1');
+
+$routes->get('pecas/excluir/(:num)', 'Pecas::excluir/$1');
 

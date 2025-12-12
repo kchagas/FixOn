@@ -6,42 +6,32 @@ use App\Models\PecaModel;
 
 class Pecas extends BaseController
 {
-    /**
-     * ======================================================
-     *  TELA DE CADASTRO DE PEÇAS
-     * ======================================================
-     * Carrega apenas o formulário para cadastrar uma nova peça.
-     */
+    // LISTAGEM
+    public function index()
+    {
+        $model = new PecaModel();
+
+        $data['title'] = "Peças";
+        $data['pecas'] = $model
+            ->where('empresa_id', session()->get('empresa_id'))
+            ->orderBy('id', 'DESC')
+            ->findAll();
+
+        return view('pecas/index', $data);
+    }
+
+    // FORMULÁRIO DE CADASTRO
     public function cadastrar()
     {
-        // Título enviado para a view
         $data['title'] = "Cadastrar Peça";
-
-        // Retorna a view localizada em app/Views/pecas/cadastrar.php
         return view('pecas/cadastrar', $data);
     }
 
-
-    /**
-     * ======================================================
-     *  SALVAR PEÇA NO BANCO DE DADOS
-     * ======================================================
-     * Recebe os dados do formulário de cadastro e salva
-     * no Banco MySQL com validação e segurança.
-     */
+    // SALVAR NOVA PEÇA
     public function salvar()
     {
-        // Instancia o Model responsável pela tabela pecas
-        $pecaModel = new PecaModel();
-
-        /**
-         * Sanitização manual dos dados:
-         * - esc() remove tags e caracteres perigosos (XSS)
-         * - strtoupper() coloca o SKU em maiúsculas
-         * - (int) força números inteiros
-         * - (float) força valores monetários
-         * - session()->get('empresa_id') garante o multi-tenant
-         */
+        $model = new PecaModel();
+        
         $post = [
             'nome'           => esc($this->request->getPost('nome')),
             'descricao'      => esc($this->request->getPost('descricao')),
@@ -50,57 +40,78 @@ class Pecas extends BaseController
             'estoque_minimo' => (int)$this->request->getPost('estoque_minimo'),
             'preco_custo'    => (float)$this->request->getPost('preco_custo'),
             'preco_venda'    => (float)$this->request->getPost('preco_venda'),
-            'empresa_id'     => session()->get('empresa_id') // Multi-tenant profissional
+            'empresa_id'     => session()->get('empresa_id')
         ];
 
-        /**
-         * Validação automática:
-         * O PecaModel contém validationRules + validationMessages
-         * Model->save() faz:
-         *   - insert ou update automático
-         *   - validação
-         *   - proteção de campos
-         */
-        if (!$pecaModel->save($post)) {
-
-            // Se falhar: volta com os erros e mantém os dados preenchidos
-            return redirect()
-                ->back()
-                ->withInput()
-                ->with('errors', $pecaModel->errors());
+        if (!$model->save($post)) {
+            return redirect()->back()->withInput()->with('errors', $model->errors());
         }
 
-        /**
-         * Se deu tudo certo: envia uma mensagem de sucesso
-         * e mantém o usuário na mesma tela para cadastrar outra peça.
-         */
-        return redirect()
-            ->to('/pecas/cadastrar')
-            ->with('success', 'Peça cadastrada com sucesso!');
+        return redirect()->to('/pecas')->with('success', 'Peça cadastrada com sucesso!');
     }
 
-
-    /**
-     * ======================================================
-     *  LISTAGEM DE TODAS AS PEÇAS
-     * ======================================================
-     * Exibe uma tabela com todas as peças cadastradas.
-     * Filtra automaticamente pela empresa (multi-tenant).
-     */
-    public function index()
+    // FORMULÁRIO DE EDIÇÃO
+    public function editar($id)
     {
         $model = new PecaModel();
 
-        // Título da página
-        $data['title'] = "Peças";
-
-        // Busca apenas peças da empresa logada
-        $data['pecas'] = $model
+        $data['title'] = "Editar Peça";
+        $data['peca'] = $model
             ->where('empresa_id', session()->get('empresa_id'))
-            ->findAll();
+            ->where('id', $id)
+            ->first();
 
-        // Retorna a lista em app/Views/pecas/index.php
-        return view('pecas/index', $data);
+        if (!$data['peca']) {
+            return redirect()->to('/pecas')->with('error', 'Peça não encontrada.');
+        }
+
+        return view('pecas/editar', $data);
     }
+
+    // SALVAR ALTERAÇÕES
+   public function atualizar($id)
+{
+    $model = new PecaModel();
+
+    // Regras de validação personalizadas
+    $rules = [
+        'nome'           => 'required|min_length[3]',
+        'sku'            => "required|is_unique[pecas.sku,id,{$id}]",
+        'unidade_medida' => 'required',
+        'estoque_minimo' => 'required|integer',
+        'preco_custo'    => 'decimal',
+        'preco_venda'    => 'decimal'
+    ];
+
+    if (!$this->validate($rules)) {
+        return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+    }
+
+    $post = [
+        'id'             => $id,
+        'nome'           => esc($this->request->getPost('nome')),
+        'descricao'      => esc($this->request->getPost('descricao')),
+        'sku'            => strtoupper(esc($this->request->getPost('sku'))),
+        'unidade_medida' => esc($this->request->getPost('unidade_medida')),
+        'estoque_minimo' => (int)$this->request->getPost('estoque_minimo'),
+        'preco_custo'    => (float)$this->request->getPost('preco_custo'),
+        'preco_venda'    => (float)$this->request->getPost('preco_venda'),
+    ];
+
+    $model->save($post);
+
+    return redirect()->to('/pecas')->with('success', 'Peça atualizada com sucesso!');
 }
 
+    // EXCLUIR PEÇA
+    public function excluir($id)
+    {
+        $model = new PecaModel();
+
+        $model->where('empresa_id', session()->get('empresa_id'))
+              ->where('id', $id)
+              ->delete();
+
+        return redirect()->to('/pecas')->with('success', 'Peça excluída com sucesso!');
+    }
+}
