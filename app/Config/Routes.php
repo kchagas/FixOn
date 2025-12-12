@@ -31,3 +31,20 @@ $routes->post('pecas/atualizar/(:num)', 'Pecas::atualizar/$1');
 
 $routes->get('pecas/excluir/(:num)', 'Pecas::excluir/$1');
 
+
+
+
+/* =======================
+   ROTAS - MOVIMENTAÇÕES
+======================= */
+
+$routes->get('movimentacoes/entrada', 'Movimentacoes::entrada');
+$routes->post('movimentacoes/salvarEntrada', 'Movimentacoes::salvarEntrada');
+
+$routes->get('movimentacoes/saida', 'Movimentacoes::saida');
+$routes->post('movimentacoes/salvarSaida', 'Movimentacoes::salvarSaida');
+
+/* =======================
+   ROTAS - USUÁRIOS
+======================= */
+

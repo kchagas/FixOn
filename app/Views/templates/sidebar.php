@@ -33,7 +33,9 @@
     <div id="submenuEstoque" class="submenu">
         <a href="<?= site_url('pecas') ?>"><i class="bi bi-grid"></i> Produtos</a>
         <a href="<?= site_url('pecas/cadastrar') ?>"><i class="bi bi-plus-circle"></i> Cadastrar Peça</a>
-        <a href="#"><i class="bi bi-arrow-left-right"></i> Entradas/Saídas</a>
+            <a href="<?= site_url('movimentacoes/entrada') ?>"><i class="bi bi-arrow-down-circle"></i> Entrada de Estoque</a>
+    <a href="<?= site_url('movimentacoes/saida') ?>"><i class="bi bi-arrow-up-circle"></i> Saída de Estoque</a>
+    
     </div>
 
 </div> <!-- 🔥 FECHAMENTO QUE FALTAVA -->
