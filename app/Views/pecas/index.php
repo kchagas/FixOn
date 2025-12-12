@@ -1,7 +1,8 @@
 <?= $this->extend('templates/dashboard') ?>
 <?= $this->section('content') ?>
 
-<h3 class="mb-4">Peças Cadastradas</h3>
+<h3 class="mb-1">Peças</h3>
+<h5 class="text-muted mb-4">Peças Cadastradas</h5>
 
 <a href="<?= site_url('pecas/cadastrar') ?>" class="btn btn-success mb-3">
     + Nova Peça
@@ -14,9 +15,9 @@
 <?php endif; ?>
 
 <div class="card shadow-sm">
-    <div class="card-body p-0">
+    <div class="card-body">
 
-        <table class="table table-dark table-hover mb-0">
+        <table id="tabelaPecas" class="table table-striped table-dark table-hover" style="width:100%">
             <thead>
                 <tr>
                     <th>SKU</th>
@@ -27,8 +28,8 @@
                     <th class="text-end">Ações</th>
                 </tr>
             </thead>
-            <tbody>
 
+            <tbody>
                 <?php foreach ($pecas as $p): ?>
 
                     <?php
@@ -45,23 +46,20 @@
                         <td><?= $status ?></td>
 
                         <td class="text-end">
-
                             <a href="<?= site_url('pecas/editar/' . $p['id']) ?>"
                                class="btn btn-sm btn-primary">
-                                <i class="bi bi-pencil-square"></i>
+                               <i class="bi bi-pencil-square"></i>
                             </a>
 
                             <a href="<?= site_url('pecas/excluir/' . $p['id']) ?>"
-                               onclick="return confirm('Tem certeza que deseja excluir esta peça?')"
-                               class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i>
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Deseja realmente excluir esta peça?')">
+                               <i class="bi bi-trash"></i>
                             </a>
-
                         </td>
                     </tr>
 
                 <?php endforeach ?>
-
             </tbody>
         </table>
 
