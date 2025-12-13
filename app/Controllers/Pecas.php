@@ -131,4 +131,94 @@ class Pecas extends BaseController
             ->with('erro_exclusao', 'Erro ao excluir a peça.');
     }
 }
+
+    // DETALHES DA PEÇA
+// DETALHES DA PEÇA
+public function detalhes($id)
+{
+    $pecaModel = new \App\Models\PecaModel();
+    $movModel  = new \App\Models\MovimentacaoModel();
+
+    // --------------------------------------------------
+    // BUSCA DA PEÇA
+    // --------------------------------------------------
+    $peca = $pecaModel->find($id);
+
+    if (!$peca) {
+        return redirect()->to('/pecas')->with('error', 'Peça não encontrada.');
+    }
+
+    // --------------------------------------------------
+    // RESUMO DE MOVIMENTAÇÕES
+    // --------------------------------------------------
+
+    // Total de entradas
+    $totalEntradas = $movModel
+        ->where('peca_id', $id)
+        ->where('tipo', 'entrada')
+        ->selectSum('quantidade')
+        ->first()['quantidade'] ?? 0;
+
+    // Total de saídas
+    $totalSaidas = $movModel
+        ->where('peca_id', $id)
+        ->where('tipo', 'saida')
+        ->selectSum('quantidade')
+        ->first()['quantidade'] ?? 0;
+
+    // Total de ajustes
+    $totalAjustes = $movModel
+        ->where('peca_id', $id)
+        ->where('tipo', 'ajuste')
+        ->selectSum('quantidade')
+        ->first()['quantidade'] ?? 0;
+
+    // --------------------------------------------------
+    // HISTÓRICO DA PEÇA
+    // --------------------------------------------------
+    $movimentacoes = $movModel
+        ->select('movimentacoes_estoque.*, usuarios.nome AS nome_usuario')
+        ->join('usuarios', 'usuarios.id = movimentacoes_estoque.usuario_id', 'left')
+        ->where('peca_id', $id)
+        ->orderBy('created_at', 'DESC')
+        ->findAll();
+
+    // --------------------------------------------------
+    // STATUS DO ESTOQUE (INTELIGENTE)
+    // --------------------------------------------------
+    if ($peca['estoque_atual'] == 0) {
+        $status = [
+            'label'   => 'Estoque Zerado',
+            'class'   => 'danger',
+            'mensagem'=> 'Atenção! Esta peça está com estoque zerado.'
+        ];
+    } elseif ($peca['estoque_atual'] <= $peca['estoque_minimo']) {
+        $status = [
+            'label'   => 'Abaixo do Mínimo',
+            'class'   => 'warning',
+            'mensagem'=> 'Estoque abaixo do mínimo definido.'
+        ];
+    } else {
+        $status = [
+            'label'   => 'Estoque Saudável',
+            'class'   => 'success',
+            'mensagem'=> 'Estoque dentro do nível ideal.'
+        ];
+    }
+
+    // --------------------------------------------------
+    // ENVIO PARA A VIEW
+    // --------------------------------------------------
+    return view('pecas/detalhes', [
+        'title'         => 'Detalhes da Peça',
+        'peca'          => $peca,
+        'totalEntradas' => $totalEntradas,
+        'totalSaidas'   => $totalSaidas,
+        'totalAjustes'  => $totalAjustes,
+        'movimentacoes' => $movimentacoes,
+        'status'        => $status
+    ]);
+}
+
+
 }

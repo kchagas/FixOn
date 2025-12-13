@@ -89,7 +89,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     <tr>
                         <td><?= esc($p['sku']) ?></td>
-                        <td><?= esc($p['nome']) ?></td>
+                      <td>
+    <a href="<?= site_url('pecas/detalhes/'.$p['id']) ?>"
+       class="fw-bold text-info text-decoration-none"
+       data-bs-toggle="tooltip"
+       data-bs-placement="top"
+       data-bs-html="true"
+       title="
+        <div>
+            <div class='tt-title'>
+                <i class='bi bi-box-seam'></i> Detalhes da Peça
+            </div>
+            <div class='tt-item'>
+                <i class='bi bi-arrow-left-right'></i>
+                Histórico de movimentações
+            </div>
+            <div class='tt-item'>
+                <i class='bi bi-sliders'></i>
+                Ajustes de estoque
+            </div>
+            <div class='tt-item'>
+                <i class='bi bi-graph-up'></i>
+                Status e indicadores
+            </div>
+        </div>
+       ">
+        <?= esc($p['nome']) ?>
+    </a>
+</td>
+
+
+
                         <td><?= esc($p['estoque_atual']) ?></td>
                         <td><?= esc($p['estoque_minimo']) ?></td>
                         <td><?= $status ?></td>

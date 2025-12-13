@@ -14,6 +14,10 @@
 <!-- DataTables + Bootstrap 5 -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
 
+<link rel="stylesheet" href="<?= base_url('assets/css/style.css') ?>">
+
+
+
 
 
 
@@ -126,7 +130,7 @@ body{
       <i class="bi bi-list"></i>
     </button>
 
-    <a class="navbar-brand fw-bold" href="#">FixOn SaaS</a>
+    <a class="navbar-brand fw-bold" href="<?= site_url('dashboard') ?>">FixOn SaaS</a>
 
     <div class="ms-auto d-flex align-items-center">
       <!-- TEMA TOGGLE -->

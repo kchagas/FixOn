@@ -65,6 +65,20 @@ $routes->get('estoque/dashboard', 'EstoqueDashboard::index');
 $routes->get('estoque/relatorio', 'Estoque::relatorioMov');
 
 
+// DETALHES DA PEÇA NO RELATÓRIO
+$routes->get('pecas/detalhes/(:num)', 'Pecas::detalhes/$1');
+
+// AJUSTE DE ESTOQUE
+$routes->post('estoque/ajustar', 'Movimentacoes::ajustarEstoque');
+
+// =======================================
+// RELATÓRIO DE MOVIMENTAÇÕES - PDF
+// =======================================
+$routes->get('estoque/relatorio/pdf', 'Estoque::relatorioMovPdf');
+// =======================================
+
+
+
 
 
 
