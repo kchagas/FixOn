@@ -52,12 +52,24 @@ return redirect()->back()->with('error', 'Senha inválida');
 
 // cria sessão segura
 $session->set([
-'isLoggedIn' => true,
-'user_id' => $user['id'],
-'user_name' => $user['nome'],
-'user_email' => $user['email'],
-'user_role' => $user['role']
+    'isLoggedIn' => true,
+
+    // Dados do usuário logado
+    'user_id'    => $user['id'],
+    'user_name'  => $user['nome'],
+    'user_email' => $user['email'],
+    'user_role'  => $user['role'],
+
+    /**
+     * 🔥 IMPORTANTE (SaaS)
+     * Empresa associada à sessão.
+     * 
+     * Por enquanto usamos empresa fixa (ID = 1).
+     * No futuro isso virá do vínculo usuário x empresa.
+     */
+    'empresa_id' => 1
 ]);
+
 
 
 return redirect()->to('/dashboard');

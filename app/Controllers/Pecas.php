@@ -3,222 +3,364 @@
 namespace App\Controllers;
 
 use App\Models\PecaModel;
+use App\Models\CategoriaModel;
+use App\Models\MovimentacaoModel;
 
 class Pecas extends BaseController
 {
-    // LISTAGEM
-    public function index()
-    {
-        $model = new PecaModel();
+    /**
+     * ======================================================
+     * LISTAGEM DE PEÇAS
+     * - Suporta filtros vindos da Dashboard (?status=...)
+     * - Sempre carrega categorias (evita erro na view)
+     * ======================================================
+     */
+   public function index()
+{
+    $model = new PecaModel();
+    $categoriaModel = new \App\Models\CategoriaModel();
 
-        $data['title'] = "Peças";
-        $data['pecas'] = $model
-            ->where('empresa_id', session()->get('empresa_id'))
-            ->orderBy('id', 'DESC')
-            ->findAll();
-
-        return view('pecas/index', $data);
+    $empresaId = session()->get('empresa_id');
+    if (!$empresaId) {
+        return redirect()->to('/login')->with('error', 'Empresa não identificada.');
     }
 
-    // FORMULÁRIO DE CADASTRO
+    // Filtros
+    $status           = $this->request->getGet('status');
+    $filtroCategoria  = $this->request->getGet('categoria_id');
+    $busca            = $this->request->getGet('q');
+
+    /**
+     * ==================================================
+     * QUERY BASE COM JOIN DE CATEGORIA
+     * ==================================================
+     */
+    $builder = $model
+        ->select('pecas.*, categorias.nome AS categoria_nome')
+        ->join('categorias', 'categorias.id = pecas.categoria_id', 'left')
+        ->where('pecas.empresa_id', $empresaId);
+
+    /**
+     * ==================================================
+     * FILTRO POR STATUS (DASHBOARD)
+     * ==================================================
+     */
+    switch ($status) {
+        case 'critico':
+            $builder->where('estoque_atual <= estoque_minimo');
+            break;
+
+        case 'atencao':
+            $builder->where('estoque_atual > estoque_minimo')
+                    ->where('estoque_atual <= estoque_minimo + 2');
+            break;
+
+        case 'zerado':
+            $builder->where('estoque_atual', 0);
+            break;
+    }
+
+    /**
+     * ==================================================
+     * FILTRO POR CATEGORIA
+     * ==================================================
+     */
+    if (!empty($filtroCategoria)) {
+        $builder->where('pecas.categoria_id', $filtroCategoria);
+    }
+
+    /**
+     * ==================================================
+     * BUSCA POR SKU OU NOME
+     * ==================================================
+     */
+    if (!empty($busca)) {
+        $builder->groupStart()
+            ->like('pecas.nome', $busca)
+            ->orLike('pecas.sku', $busca)
+            ->groupEnd();
+    }
+
+    $pecas = $builder
+        ->orderBy('pecas.nome', 'ASC')
+        ->findAll();
+
+    return view('pecas/index', [
+        'title'            => 'Peças',
+        'pecas'            => $pecas,
+        'categorias'       => $categoriaModel
+                                ->where('empresa_id', $empresaId)
+                                ->where('ativo', 1)
+                                ->orderBy('nome', 'ASC')
+                                ->findAll(),
+        'filtro_categoria' => $filtroCategoria,
+        'filtro_status'    => $status,
+        'busca'            => $busca
+    ]);
+}
+    /**
+     * ======================================================
+     * FORMULÁRIO DE CADASTRO
+     * ======================================================
+     */
     public function cadastrar()
     {
-        $data['title'] = "Cadastrar Peça";
-        return view('pecas/cadastrar', $data);
+        $categoriaModel = new CategoriaModel();
+
+        return view('pecas/cadastrar', [
+            'title'      => 'Cadastrar Peça',
+            'categorias' => $categoriaModel
+                ->where('empresa_id', session()->get('empresa_id'))
+                ->where('ativo', 1)
+                ->orderBy('nome', 'ASC')
+                ->findAll()
+        ]);
     }
 
-    // SALVAR NOVA PEÇA
+    /**
+     * ======================================================
+     * SALVAR NOVA PEÇA
+     * ======================================================
+     */
     public function salvar()
     {
         $model = new PecaModel();
-        
+
         $post = [
             'nome'           => esc($this->request->getPost('nome')),
             'descricao'      => esc($this->request->getPost('descricao')),
             'sku'            => strtoupper(esc($this->request->getPost('sku'))),
             'unidade_medida' => esc($this->request->getPost('unidade_medida')),
-            'estoque_minimo' => (int)$this->request->getPost('estoque_minimo'),
-            'preco_custo'    => (float)$this->request->getPost('preco_custo'),
-            'preco_venda'    => (float)$this->request->getPost('preco_venda'),
+            'categoria_id'   => (int) $this->request->getPost('categoria_id'),
+            'estoque_minimo' => (int) $this->request->getPost('estoque_minimo'),
+            'preco_custo'    => (float) $this->request->getPost('preco_custo'),
+            'preco_venda'    => (float) $this->request->getPost('preco_venda'),
             'empresa_id'     => session()->get('empresa_id')
         ];
 
         if (!$model->save($post)) {
-            return redirect()->back()->withInput()->with('errors', $model->errors());
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', $model->errors());
         }
 
-        return redirect()->to('/pecas')->with('success', 'Peça cadastrada com sucesso!');
+        return redirect()->to('/pecas')
+            ->with('success', 'Peça cadastrada com sucesso!');
     }
 
-    // FORMULÁRIO DE EDIÇÃO
+    /**
+     * ======================================================
+     * FORMULÁRIO DE EDIÇÃO
+     * ======================================================
+     */
     public function editar($id)
     {
         $model = new PecaModel();
 
-        $data['title'] = "Editar Peça";
-        $data['peca'] = $model
+        $peca = $model
             ->where('empresa_id', session()->get('empresa_id'))
             ->where('id', $id)
             ->first();
 
-        if (!$data['peca']) {
-            return redirect()->to('/pecas')->with('error', 'Peça não encontrada.');
+        if (!$peca) {
+            return redirect()->to('/pecas')
+                ->with('error', 'Peça não encontrada.');
         }
 
-        return view('pecas/editar', $data);
+        return view('pecas/editar', [
+            'title' => 'Editar Peça',
+            'peca'  => $peca
+        ]);
     }
 
-    // SALVAR ALTERAÇÕES
-   public function atualizar($id)
-{
-    $model = new PecaModel();
+    /**
+     * ======================================================
+     * ATUALIZAR PEÇA
+     * ======================================================
+     */
+    public function atualizar($id)
+    {
+        $model = new PecaModel();
 
-    // Regras de validação personalizadas
-    $rules = [
-        'nome'           => 'required|min_length[3]',
-        'sku'            => "required|is_unique[pecas.sku,id,{$id}]",
-        'unidade_medida' => 'required',
-        'estoque_minimo' => 'required|integer',
-        'preco_custo'    => 'decimal',
-        'preco_venda'    => 'decimal'
-    ];
+        $rules = [
+            'nome'           => 'required|min_length[3]',
+            'sku'            => "required|is_unique[pecas.sku,id,{$id}]",
+            'unidade_medida' => 'required',
+            'estoque_minimo' => 'required|integer',
+            'preco_custo'    => 'decimal',
+            'preco_venda'    => 'decimal'
+        ];
 
-    if (!$this->validate($rules)) {
-        return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        if (!$this->validate($rules)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('errors', $this->validator->getErrors());
+        }
+
+        $post = [
+            'id'             => $id,
+            'nome'           => esc($this->request->getPost('nome')),
+            'descricao'      => esc($this->request->getPost('descricao')),
+            'sku'            => strtoupper(esc($this->request->getPost('sku'))),
+            'unidade_medida' => esc($this->request->getPost('unidade_medida')),
+            'estoque_minimo' => (int) $this->request->getPost('estoque_minimo'),
+            'preco_custo'    => (float) $this->request->getPost('preco_custo'),
+            'preco_venda'    => (float) $this->request->getPost('preco_venda'),
+        ];
+
+        $model->save($post);
+
+        return redirect()->to('/pecas')
+            ->with('success', 'Peça atualizada com sucesso!');
     }
 
-    $post = [
-        'id'             => $id,
-        'nome'           => esc($this->request->getPost('nome')),
-        'descricao'      => esc($this->request->getPost('descricao')),
-        'sku'            => strtoupper(esc($this->request->getPost('sku'))),
-        'unidade_medida' => esc($this->request->getPost('unidade_medida')),
-        'estoque_minimo' => (int)$this->request->getPost('estoque_minimo'),
-        'preco_custo'    => (float)$this->request->getPost('preco_custo'),
-        'preco_venda'    => (float)$this->request->getPost('preco_venda'),
-    ];
-
-    $model->save($post);
-
-    return redirect()->to('/pecas')->with('success', 'Peça atualizada com sucesso!');
-}
-
-    // EXCLUIR PEÇA
+    /**
+     * ======================================================
+     * EXCLUIR PEÇA (com proteção por FK)
+     * ======================================================
+     */
     public function excluir($id)
-{
-    $pecaModel = new PecaModel();
+    {
+        $model = new PecaModel();
 
-    try {
-        $pecaModel->delete($id);
+        try {
+            $model->delete($id);
 
-        return redirect()
-            ->to('/pecas')
-            ->with('success', 'Peça excluída com sucesso.');
+            return redirect()->to('/pecas')
+                ->with('success', 'Peça excluída com sucesso.');
 
-    } catch (\Exception $e) {
+        } catch (\Exception $e) {
 
-        // Verifica se é erro de integridade (FK - código 1451)
-        if (strpos($e->getMessage(), '1451') !== false) {
+            if (strpos($e->getMessage(), '1451') !== false) {
+                return redirect()->to('/pecas')
+                    ->with('erro_exclusao', 'Esta peça possui movimentações e não pode ser excluída.');
+            }
 
-            return redirect()
-                ->to('/pecas')
-                ->with('erro_exclusao', 'Esta peça já possui movimentações no estoque e não pode ser excluída.');
+            return redirect()->to('/pecas')
+                ->with('erro_exclusao', 'Erro ao excluir a peça.');
+        }
+    }
+
+    /**
+     * ======================================================
+     * DETALHES DA PEÇA
+     * ======================================================
+     */
+    public function detalhes($id)
+    {
+        $pecaModel = new PecaModel();
+        $movModel  = new MovimentacaoModel();
+
+        // Busca peça
+        $peca = $pecaModel->find($id);
+
+        if (!$peca) {
+            return redirect()->to('/pecas')
+                ->with('error', 'Peça não encontrada.');
         }
 
-        // Outros erros genéricos
-        return redirect()
-            ->to('/pecas')
-            ->with('erro_exclusao', 'Erro ao excluir a peça.');
-    }
-}
+        /**
+         * -------------------------------
+         * RESUMO DE MOVIMENTAÇÕES
+         * -------------------------------
+         */
+        $totalEntradas = $movModel
+            ->where('peca_id', $id)
+            ->where('tipo', 'entrada')
+            ->selectSum('quantidade')
+            ->first()['quantidade'] ?? 0;
 
-    // DETALHES DA PEÇA
-// DETALHES DA PEÇA
-public function detalhes($id)
-{
-    $pecaModel = new \App\Models\PecaModel();
-    $movModel  = new \App\Models\MovimentacaoModel();
+        $totalSaidas = $movModel
+            ->where('peca_id', $id)
+            ->where('tipo', 'saida')
+            ->selectSum('quantidade')
+            ->first()['quantidade'] ?? 0;
 
-    // --------------------------------------------------
-    // BUSCA DA PEÇA
-    // --------------------------------------------------
-    $peca = $pecaModel->find($id);
+        $totalAjustes = $movModel
+            ->where('peca_id', $id)
+            ->where('tipo', 'ajuste')
+            ->selectSum('quantidade')
+            ->first()['quantidade'] ?? 0;
 
-    if (!$peca) {
-        return redirect()->to('/pecas')->with('error', 'Peça não encontrada.');
-    }
+        /**
+         * -------------------------------
+         * HISTÓRICO (GARANTE ARRAY)
+         * -------------------------------
+         */
+        $movimentacoes = $movModel
+            ->select('movimentacoes_estoque.*, usuarios.nome AS nome_usuario')
+            ->join('usuarios', 'usuarios.id = movimentacoes_estoque.usuario_id', 'left')
+            ->where('peca_id', $id)
+            ->orderBy('created_at', 'DESC')
+            ->findAll();
 
-    // --------------------------------------------------
-    // RESUMO DE MOVIMENTAÇÕES
-    // --------------------------------------------------
+        $movimentacoes = $movimentacoes ?? [];
 
-    // Total de entradas
-    $totalEntradas = $movModel
-        ->where('peca_id', $id)
-        ->where('tipo', 'entrada')
-        ->selectSum('quantidade')
-        ->first()['quantidade'] ?? 0;
+        /**
+         * -------------------------------
+         * STATUS INTELIGENTE
+         * -------------------------------
+         */
+        if ($peca['estoque_atual'] == 0) {
+            $status = [
+                'label'    => 'Estoque Zerado',
+                'class'    => 'danger',
+                'mensagem' => 'Reposição urgente necessária.'
+            ];
+        } elseif ($peca['estoque_atual'] <= $peca['estoque_minimo']) {
+            $status = [
+                'label'    => 'Abaixo do Mínimo',
+                'class'    => 'warning',
+                'mensagem' => 'Estoque abaixo do mínimo.'
+            ];
+        } else {
+            $status = [
+                'label'    => 'Estoque OK',
+                'class'    => 'success',
+                'mensagem' => 'Estoque dentro do nível ideal.'
+            ];
+        }
 
-    // Total de saídas
-    $totalSaidas = $movModel
-        ->where('peca_id', $id)
-        ->where('tipo', 'saida')
-        ->selectSum('quantidade')
-        ->first()['quantidade'] ?? 0;
-
-    // Total de ajustes
-    $totalAjustes = $movModel
-        ->where('peca_id', $id)
-        ->where('tipo', 'ajuste')
-        ->selectSum('quantidade')
-        ->first()['quantidade'] ?? 0;
-
-    // --------------------------------------------------
-    // HISTÓRICO DA PEÇA
-    // --------------------------------------------------
-    $movimentacoes = $movModel
-        ->select('movimentacoes_estoque.*, usuarios.nome AS nome_usuario')
-        ->join('usuarios', 'usuarios.id = movimentacoes_estoque.usuario_id', 'left')
-        ->where('peca_id', $id)
-        ->orderBy('created_at', 'DESC')
-        ->findAll();
-
-    // --------------------------------------------------
-    // STATUS DO ESTOQUE (INTELIGENTE)
-    // --------------------------------------------------
-    if ($peca['estoque_atual'] == 0) {
-        $status = [
-            'label'   => 'Estoque Zerado',
-            'class'   => 'danger',
-            'mensagem'=> 'Atenção! Esta peça está com estoque zerado.'
-        ];
-    } elseif ($peca['estoque_atual'] <= $peca['estoque_minimo']) {
-        $status = [
-            'label'   => 'Abaixo do Mínimo',
-            'class'   => 'warning',
-            'mensagem'=> 'Estoque abaixo do mínimo definido.'
-        ];
-    } else {
-        $status = [
-            'label'   => 'Estoque Saudável',
-            'class'   => 'success',
-            'mensagem'=> 'Estoque dentro do nível ideal.'
-        ];
+        return view('pecas/detalhes', [
+            'title'         => 'Detalhes da Peça',
+            'peca'          => $peca,
+            'totalEntradas' => $totalEntradas,
+            'totalSaidas'   => $totalSaidas,
+            'totalAjustes'  => $totalAjustes,
+            'movimentacoes' => $movimentacoes,
+            'status'        => $status
+        ]);
     }
 
-    // --------------------------------------------------
-    // ENVIO PARA A VIEW
-    // --------------------------------------------------
-    return view('pecas/detalhes', [
-        'title'         => 'Detalhes da Peça',
-        'peca'          => $peca,
-        'totalEntradas' => $totalEntradas,
-        'totalSaidas'   => $totalSaidas,
-        'totalAjustes'  => $totalAjustes,
-        'movimentacoes' => $movimentacoes,
-        'status'        => $status
-    ]);
-}
+    /**
+     * ======================================================
+     * EXPORTAÇÃO CSV
+     * ======================================================
+     */
+    public function exportarCsv()
+    {
+        $model = new PecaModel();
 
+        $pecas = $model
+            ->where('empresa_id', session()->get('empresa_id'))
+            ->findAll();
 
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename=pecas.csv');
+
+        $out = fopen('php://output', 'w');
+        fputcsv($out, ['SKU', 'Nome', 'Estoque', 'Mínimo']);
+
+        foreach ($pecas as $p) {
+            fputcsv($out, [
+                $p['sku'],
+                $p['nome'],
+                $p['estoque_atual'],
+                $p['estoque_minimo']
+            ]);
+        }
+
+        fclose($out);
+        exit;
+    }
 }

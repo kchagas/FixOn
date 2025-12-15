@@ -118,44 +118,44 @@
                     <th>Motivo</th>
                 </tr>
             </thead>
-            <tbody>
+           <tbody>
 
-                <?php foreach ($movimentacoes as $m): ?>
-                    <tr>
+<?php if (!empty($movimentacoes)): ?>
 
-                        <!-- Data -->
-                        <td><?= date('d/m/Y H:i', strtotime($m['created_at'])) ?></td>
+    <?php foreach ($movimentacoes as $m): ?>
+        <tr>
 
-                        <!-- Tipo -->
-                        <td>
-                            <?php if ($m['tipo'] === 'entrada'): ?>
-                                <span class="text-success">
-                                    <i class="bi bi-arrow-down-circle"></i> Entrada
-                                </span>
-                            <?php elseif ($m['tipo'] === 'saida'): ?>
-                                <span class="text-danger">
-                                    <i class="bi bi-arrow-up-circle"></i> Saída
-                                </span>
-                            <?php else: ?>
-                                <span class="text-warning">
-                                    <i class="bi bi-sliders"></i> Ajuste
-                                </span>
-                            <?php endif; ?>
-                        </td>
+            <!-- DATA -->
+            <td><?= date('d/m/Y H:i', strtotime($m['created_at'])) ?></td>
 
-                        <!-- Quantidade -->
-                        <td><?= $m['quantidade'] ?></td>
+            <!-- TIPO -->
+            <td><?= ucfirst($m['tipo']) ?></td>
 
-                        <!-- Usuário -->
-                        <td><?= esc($m['nome_usuario'] ?? 'Sistema') ?></td>
+            <!-- QUANTIDADE -->
+            <td><?= esc($m['quantidade']) ?></td>
 
-                        <!-- Motivo -->
-                        <td><?= esc($m['motivo']) ?></td>
+            <!-- USUÁRIO -->
+            <td><?= esc($m['nome_usuario'] ?? 'Sistema') ?></td>
 
-                    </tr>
-                <?php endforeach; ?>
+            <!-- MOTIVO -->
+            <td><?= esc($m['motivo']) ?></td>
 
-            </tbody>
+        </tr>
+    <?php endforeach; ?>
+
+<?php else: ?>
+
+    <tr>
+        <td colspan="5" class="text-center text-muted py-4">
+            <i class="bi bi-info-circle"></i>
+            Nenhuma movimentação registrada para esta peça.
+        </td>
+    </tr>
+
+<?php endif; ?>
+
+</tbody>
+
         </table>
 
     </div>

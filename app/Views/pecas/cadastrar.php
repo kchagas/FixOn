@@ -43,6 +43,26 @@
         <textarea name="descricao" class="form-control"></textarea>
     </div>
 
+    <div class="mb-3">
+    <label class="form-label fw-bold">Categoria</label>
+
+    <select name="categoria_id" class="form-select" required>
+        <option value="">Selecione uma categoria</option>
+
+        <?php foreach ($categorias as $c): ?>
+            <option value="<?= $c['id'] ?>"
+                <?= old('categoria_id') == $c['id'] ? 'selected' : '' ?>>
+                <?= esc($c['nome']) ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+
+    <div class="form-text">
+        A categoria ajuda na organização, relatórios e filtros.
+    </div>
+</div>
+
+
     <div class="col-md-4">
         <label class="form-label">Estoque Mínimo</label>
         <input type="number" name="estoque_minimo" value="2" min="1" class="form-control" required>

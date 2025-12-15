@@ -77,6 +77,46 @@ $routes->post('estoque/ajustar', 'Movimentacoes::ajustarEstoque');
 $routes->get('estoque/relatorio/pdf', 'Estoque::relatorioMovPdf');
 // =======================================
 
+// categorias
+$routes->get('categorias', 'Categorias::index');
+$routes->get('categorias/cadastrar', 'Categorias::cadastrar');
+$routes->post('categorias/salvar', 'Categorias::salvar');
+$routes->get('categorias/editar/(:num)', 'Categorias::editar/$1');
+$routes->post('categorias/atualizar/(:num)', 'Categorias::atualizar/$1');
+$routes->get('categorias/desativar/(:num)', 'Categorias::desativar/$1');
+
+
+/*
+|--------------------------------------------------------------------------
+| ROTAS - CATEGORIAS
+|--------------------------------------------------------------------------
+*/
+
+$routes->group('categorias', ['filter' => 'auth'], function($routes) {
+
+    $routes->get('/', 'Categorias::index');
+    $routes->get('cadastrar', 'Categorias::cadastrar');
+    $routes->post('salvar', 'Categorias::salvar');
+
+    $routes->get('editar/(:num)', 'Categorias::editar/$1');
+    $routes->post('atualizar/(:num)', 'Categorias::atualizar/$1');
+
+    $routes->get('desativar/(:num)', 'Categorias::desativar/$1');
+    $routes->get('ativar/(:num)', 'Categorias::ativar/$1');
+
+});
+
+// REPOSIÇÃO DE ESTOQUE
+$routes->get('estoque/repor/(:num)', 'Estoque::repor/$1');
+$routes->post('estoque/repor/(:num)', 'Estoque::salvarReposicao/$1');
+$routes->post('estoque/processarReposicao', 'Estoque::processarReposicao');
+
+
+
+
+
+
+
 
 
 

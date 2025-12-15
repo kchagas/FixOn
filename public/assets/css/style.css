@@ -32,3 +32,74 @@
 .tooltip.bs-tooltip-top .tooltip-arrow::before {
     border-top-color: rgba(0, 153, 255, 0.5);
 }
+
+.submenu-divider {
+    border: 0;
+    height: 1px;
+    background: rgba(255,255,255,0.15);
+    margin: 8px 0;
+}
+
+
+
+/* KPI Cards  tela dashboard estoque
+    
+*/
+.kpi-card {
+    background: linear-gradient(145deg, #111827, #0b1220);
+    border-radius: 16px;
+    padding: 22px;
+    color: #e5e7eb;
+    box-shadow: 0 8px 22px rgba(0,0,0,.35);
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,.08), transparent 60%);
+}
+
+.kpi-icon {
+    font-size: 2.4rem;
+    opacity: .9;
+}
+
+.kpi-label {
+    font-size: .9rem;
+    color: #9ca3af;
+    margin-bottom: 6px;
+}
+
+.kpi-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+/* Link que envolve o card KPI */
+.kpi-link {
+    text-decoration: none !important; /* remove sublinhado */
+    color: inherit;                   /* mantém cor do card */
+    display: block;                   /* garante área clicável total */
+}
+
+/* Garante que no hover também não apareça sublinhado */
+.kpi-link:hover,
+.kpi-link:focus,
+.kpi-link:active {
+    text-decoration: none !important;
+    color: inherit;
+}
+
+/* Botões Pequenos com Efeito Hover Suave */
+.btn-sm {
+    transition: all .2s ease-in-out;
+}
+.btn-sm:hover {
+    transform: translateY(-1px);
+}
+
+
+
+
