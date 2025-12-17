@@ -85,8 +85,14 @@
         </a>
 
         <a href="<?= site_url('estoque/relatorio') ?>">
-            <i class="bi bi-clipboard-data"></i> Relatório de Movimentações
-        </a>
+        <i class="bi bi-clipboard-data"></i> Relatório de Movimentações</a>
+
+         <hr class="submenu-divider">
+
+        <a href="<?= site_url('estoque/alertas') ?>"><i class="bi bi-bell"></i> Alertas Inteligentes</a>
+        <a href="<?= site_url('estoque/compras') ?>"><i class="bi bi-cart-check"></i> Compras Inteligentes</a>
+
+
 
     </div>
 

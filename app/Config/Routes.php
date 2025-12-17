@@ -112,6 +112,18 @@ $routes->post('estoque/repor/(:num)', 'Estoque::salvarReposicao/$1');
 $routes->post('estoque/processarReposicao', 'Estoque::processarReposicao');
 
 
+// ==========================================================
+// PASSO 5.1 - ESTOQUE INTELIGENTE
+// ==========================================================
+$routes->get('estoque/alertas', 'EstoqueInteligente::alertas', ['filter' => 'auth']);
+$routes->get('estoque/compras', 'EstoqueInteligente::compras', ['filter' => 'auth']);
+$routes->get('estoque/gerar-alertas', 'EstoqueInteligente::gerarAlertas', ['filter' => 'auth']);
+/* ==========================================================
+   FIM - PASSO 5.1 - ESTOQUE INTELIGENTE
+   ========================================================== */
+
+   
+
 
 
 
