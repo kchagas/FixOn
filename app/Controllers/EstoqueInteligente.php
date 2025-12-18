@@ -9,37 +9,42 @@ use App\Services\EstoqueInteligenteService;
  * ==========================================================
  * EstoqueInteligente (Passo 5.1)
  * ----------------------------------------------------------
- * Rotas principais:
- * - /estoque/alertas            -> Central de alertas
- * - /estoque/compras            -> Lista inteligente de compras
- * - /estoque/gerar-alertas      -> Gera/atualiza log de alertas
+ * - Central de Alertas
+ * - Compras Inteligentes
+ * - Geração de alertas (snapshot)
  * ==========================================================
  */
 class EstoqueInteligente extends BaseController
 {
+    /**
+     * Motor inteligente de estoque
+     */
     protected EstoqueInteligenteService $service;
 
     public function __construct()
     {
+        // Inicializa o motor inteligente
         $this->service = new EstoqueInteligenteService();
     }
 
     /**
-     * Central de Alertas (visão de gestor)
-     * Mostra apenas itens que não estão "ok".
+     * CENTRAL DE ALERTAS
+     * Mostra apenas itens com risco (≠ ok)
      */
     public function alertas()
     {
         $empresaId = (int) session()->get('empresa_id');
 
         if (!$empresaId) {
-            return redirect()->to('/login')->with('error', 'Empresa não identificada.');
+            return redirect()
+                ->to('/login')
+                ->with('error', 'Empresa não identificada.');
         }
 
-        // Gera snapshot (cálculos do motor)
+        // Snapshot do motor
         $snap = $this->service->gerarSnapshot($empresaId);
 
-        // Filtra para mostrar apenas níveis relevantes
+        // Filtra níveis relevantes
         $alertas = array_filter($snap['itens'], function ($item) {
             return in_array($item['nivel'], ['urgente', 'critico', 'atencao'], true);
         });
@@ -52,28 +57,35 @@ class EstoqueInteligente extends BaseController
     }
 
     /**
-     * Lista Inteligente de Compras
-     * Mostra itens com sugestão > 0 (baseado na cobertura X dias).
+     * COMPRAS INTELIGENTES
+     * Mostra apenas itens com sugestão > 0
      */
     public function compras()
     {
         $empresaId = (int) session()->get('empresa_id');
 
         if (!$empresaId) {
-            return redirect()->to('/login')->with('error', 'Empresa não identificada.');
+            return redirect()
+                ->to('/login')
+                ->with('error', 'Empresa não identificada.');
         }
 
         $snap = $this->service->gerarSnapshot($empresaId);
 
-        // Só entra o que tem compra sugerida (ERP real)
+        // Apenas itens com sugestão de compra
         $compras = array_filter($snap['itens'], function ($item) {
-            return (int)$item['qtd_sugerida'] > 0;
+            return (int) $item['qtd_sugerida'] > 0;
         });
 
-        // Ordena por nível (urgente primeiro), depois menor "dias_para_zerar"
+        // Ordenação inteligente
         usort($compras, function ($a, $b) {
 
-            $peso = ['urgente'=>1, 'critico'=>2, 'atencao'=>3, 'ok'=>4];
+            $peso = [
+                'urgente' => 1,
+                'critico' => 2,
+                'atencao' => 3,
+                'ok'      => 4,
+            ];
 
             $pa = $peso[$a['nivel']] ?? 99;
             $pb = $peso[$b['nivel']] ?? 99;
@@ -96,30 +108,31 @@ class EstoqueInteligente extends BaseController
     }
 
     /**
-     * Gera log em alertas_estoque (interno)
-     * - Útil para histórico e para o futuro WhatsApp (Passo 5.2)
+     * GERA ALERTAS (LOG)
+     * Atualiza tabela alertas_estoque
      */
     public function gerarAlertas()
     {
         $empresaId = (int) session()->get('empresa_id');
 
         if (!$empresaId) {
-            return redirect()->to('/login')->with('error', 'Empresa não identificada.');
+            return redirect()
+                ->to('/login')
+                ->with('error', 'Empresa não identificada.');
         }
 
         $snap = $this->service->gerarSnapshot($empresaId);
 
         $alertaModel = new AlertaEstoqueModel();
 
-        // Para MVP: cria um registro por item com nível != ok
         foreach ($snap['itens'] as $item) {
 
+            // Ignora itens OK
             if ($item['nivel'] === 'ok') {
                 continue;
             }
 
-            // Evita duplicar “igualzinho” toda hora:
-            // - Aqui faremos um upsert simples: se existir alerta não resolvido para peça+nível, atualiza.
+            // Verifica alerta aberto
             $existente = $alertaModel
                 ->where('empresa_id', $empresaId)
                 ->where('peca_id', $item['peca_id'])

@@ -92,6 +92,11 @@
         <a href="<?= site_url('estoque/alertas') ?>"><i class="bi bi-bell"></i> Alertas Inteligentes</a>
         <a href="<?= site_url('estoque/compras') ?>"><i class="bi bi-cart-check"></i> Compras Inteligentes</a>
 
+        <a href="<?= site_url('estoque/gerar-alertas') ?>" class="btn btn-outline-info">
+    <i class="bi bi-arrow-repeat"></i> Atualizar alertas
+</a>
+
+
 
 
     </div>

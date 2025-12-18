@@ -122,6 +122,23 @@ $routes->get('estoque/gerar-alertas', 'EstoqueInteligente::gerarAlertas', ['filt
    FIM - PASSO 5.1 - ESTOQUE INTELIGENTE
    ========================================================== */
 
+   use App\Controllers\EstoqueInteligente;
+
+// ===============================
+// ESTOQUE INTELIGENTE (PASSO 5)
+// ===============================
+
+/* =======================
+   ROTAS - ESTOQUE INTELIGENTE
+   ==================== */
+
+$routes->get('estoque/alertas', 'EstoqueInteligente::alertas');
+$routes->get('estoque/compras', 'EstoqueInteligente::compras');
+$routes->get('estoque/gerar-alertas', 'EstoqueInteligente::gerarAlertas');
+
+
+
+
    
 
 

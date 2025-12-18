@@ -1,0 +1,42 @@
+<?= $this->extend('templates/dashboard') ?>
+<?= $this->section('content') ?>
+
+<h3 class="mb-3">Histórico de Notificações</h3>
+<small class="text-muted">Simulação — nenhuma mensagem foi enviada</small>
+
+<div class="card shadow-sm mt-3">
+    <div class="card-body p-0">
+
+        <table class="table table-dark table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Nível</th>
+                    <th>Título</th>
+                    <th>Mensagem</th>
+                    <th>Data</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            <?php foreach ($notificacoes as $n): ?>
+                <tr>
+                    <td>
+                        <?= match($n['nivel']) {
+                            'urgente' => "<span class='badge bg-danger'>Urgente</span>",
+                            'critico' => "<span class='badge bg-warning text-dark'>Crítico</span>",
+                            'atencao' => "<span class='badge bg-info text-dark'>Atenção</span>",
+                        } ?>
+                    </td>
+                    <td><?= esc($n['titulo']) ?></td>
+                    <td style="white-space: pre-line"><?= esc($n['mensagem']) ?></td>
+                    <td><?= date('d/m/Y H:i', strtotime($n['created_at'])) ?></td>
+                </tr>
+            <?php endforeach; ?>
+
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+<?= $this->endSection() ?>
