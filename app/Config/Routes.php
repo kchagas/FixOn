@@ -128,13 +128,32 @@ $routes->get('estoque/gerar-alertas', 'EstoqueInteligente::gerarAlertas', ['filt
 // ESTOQUE INTELIGENTE (PASSO 5)
 // ===============================
 
-/* =======================
-   ROTAS - ESTOQUE INTELIGENTE
-   ==================== */
 
-$routes->get('estoque/alertas', 'EstoqueInteligente::alertas');
-$routes->get('estoque/compras', 'EstoqueInteligente::compras');
-$routes->get('estoque/gerar-alertas', 'EstoqueInteligente::gerarAlertas');
+
+// ------------------------------------------------------------
+// ROTAS DO MÓDULO FINANCEIRO (FASE 1 - Contas a Pagar)
+// ------------------------------------------------------------
+$routes->group('financeiro', ['filter' => 'auth'], function($routes) {
+
+    // --------------------------------------------------------
+    // DASHBOARD FINANCEIRO (NOVO - PASSO 2)
+    // URL: /financeiro/dashboard
+    // --------------------------------------------------------
+    $routes->get('dashboard', 'Financeiro\FinanceiroDashboard::index');
+
+    // --------------------------------------------------------
+    // CONTAS A PAGAR (CRUD)
+    // URL base: /financeiro/contas-pagar
+    // --------------------------------------------------------
+    $routes->get('contas-pagar', 'Financeiro\ContasPagar::index');                    // Lista
+    $routes->get('contas-pagar/create', 'Financeiro\ContasPagar::create');            // Form criar
+    $routes->post('contas-pagar/store', 'Financeiro\ContasPagar::store');             // Salvar
+    $routes->get('contas-pagar/edit/(:num)', 'Financeiro\ContasPagar::edit/$1');      // Form editar
+    $routes->post('contas-pagar/update/(:num)', 'Financeiro\ContasPagar::update/$1'); // Atualizar
+    $routes->get('contas-pagar/delete/(:num)', 'Financeiro\ContasPagar::delete/$1');  // Excluir
+});
+
+
 
 
 

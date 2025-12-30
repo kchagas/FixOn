@@ -1,4 +1,4 @@
- <div id="sidebar">
+<div id="sidebar">
 
     <!-- ===============================
          CONFIGURAÇÕES DO SISTEMA
@@ -46,14 +46,16 @@
 
     <div id="submenuEstoque" class="submenu">
 
-        <!-- ===== CADASTROS ===== -->
+     <!-- ANÁLISES -->
+        <a href="<?= site_url('estoque/dashboard') ?>">
+            <i class="bi bi-speedometer2"></i> Dashboard do Estoque
+        </a>
 
-        <!-- CATEGORIAS -->
-    <a href="<?= site_url('categorias') ?>">
-        <i class="bi bi-tags"></i> Categorias
-    </a>
+        <!-- CADASTROS -->
+        <a href="<?= site_url('categorias') ?>">
+            <i class="bi bi-tags"></i> Categorias
+        </a>
 
-        <!-- Produtos / Peças -->
         <a href="<?= site_url('pecas') ?>">
             <i class="bi bi-grid"></i> Produtos
         </a>
@@ -64,8 +66,7 @@
 
         <hr class="submenu-divider">
 
-        <!-- ===== OPERAÇÕES ===== -->
-
+        <!-- OPERAÇÕES -->
         <a href="<?= site_url('movimentacoes/entrada') ?>">
             <i class="bi bi-arrow-down-circle"></i> Entrada de Estoque
         </a>
@@ -74,48 +75,52 @@
             <i class="bi bi-arrow-up-circle"></i> Saída de Estoque
         </a>
 
-        <!-- (Ajuste de estoque já existe via detalhes da peça) -->
+        <hr class="submenu-divider">
+
+       
+
+        <a href="<?= site_url('estoque/relatorio') ?>">
+            <i class="bi bi-clipboard-data"></i> Relatório de Movimentações
+        </a>
 
         <hr class="submenu-divider">
 
-        <!-- ===== ANÁLISES ===== -->
-
-        <a href="<?= site_url('estoque/dashboard') ?>">
-            <i class="bi bi-speedometer2"></i> Dashboard do Estoque
+        <a href="<?= site_url('estoque/alertas') ?>">
+            <i class="bi bi-bell"></i> Alertas Inteligentes
         </a>
 
-        <a href="<?= site_url('estoque/relatorio') ?>">
-        <i class="bi bi-clipboard-data"></i> Relatório de Movimentações</a>
+        <a href="<?= site_url('estoque/compras') ?>">
+            <i class="bi bi-cart-check"></i> Compras Inteligentes
+        </a>
 
-         <hr class="submenu-divider">
-
-        <a href="<?= site_url('estoque/alertas') ?>"><i class="bi bi-bell"></i> Alertas Inteligentes</a>
-        <a href="<?= site_url('estoque/compras') ?>"><i class="bi bi-cart-check"></i> Compras Inteligentes</a>
-
-        <a href="<?= site_url('estoque/gerar-alertas') ?>" class="btn btn-outline-info">
-    <i class="bi bi-arrow-repeat"></i> Atualizar alertas
-</a>
-
-
-
+        <a href="<?= site_url('estoque/gerar-alertas') ?>">
+            <i class="bi bi-arrow-repeat"></i> Atualizar Alertas
+        </a>
 
     </div>
+
+
+    <!-- ===============================
+     FINANCEIRO
+=============================== -->
+<div class="menu-item" onclick="toggleSubmenu('submenuFinanceiro')">
+    <i class="bi bi-cash-coin"></i>
+    <span class="menu-text">Financeiro</span>
+</div>
+
+<div id="submenuFinanceiro" class="submenu">
+
+    <!-- DASHBOARD FINANCEIRO -->
+    <a href="<?= site_url('financeiro/dashboard') ?>">
+        <i class="bi bi-speedometer2"></i> Dashboard Financeiro
+    </a>
+
+    <!-- CONTAS A PAGAR -->
+    <a href="<?= site_url('financeiro/contas-pagar') ?>">
+        <i class="bi bi-arrow-down-circle"></i> Contas a Pagar
+    </a>
+
+</div>
+
 
 </div> <!-- FIM SIDEBAR -->
-
-
-
-
-    <div id="submenuEstoque" class="submenu">
-        <a href="<?= site_url('pecas') ?>"><i class="bi bi-grid"></i> Produtos</a>
-        <a href="<?= site_url('pecas/cadastrar') ?>"><i class="bi bi-plus-circle"></i> Cadastrar Peça</a>
-            <a href="<?= site_url('movimentacoes/entrada') ?>"><i class="bi bi-arrow-down-circle"></i> Entrada de Estoque</a>
-    <a href="<?= site_url('movimentacoes/saida') ?>"><i class="bi bi-arrow-up-circle"></i> Saída de Estoque</a>
-    <a href="<?= site_url('estoque/dashboard') ?>"><i class="bi bi-speedometer2"></i> Dashboard do Estoque</a>
-     <a href="<?= site_url('estoque/relatorio') ?>"><i class="bi bi-clipboard-data"></i>Relatório de Movimentações</a>
-     
-
-    
-    </div>
-
-</div> <!-- 🔥 FECHAMENTO QUE FALTAVA -->
